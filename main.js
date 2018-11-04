@@ -21,7 +21,7 @@ if (cmdarg == "-h" || cmdarg == "--help" || cmdarg == "-help" || cmdarg == "?" |
 	console.log("\nUsage:  nodejs filename.js [-r channel]\n");
 	process.exit(1);
 } else {
-	var room = "programming"; //This is the room you join when the interface is started
+	var room = "programming"; //This is the room you join when the client is started
 }
 
 var userName = "blessedBotUser";
