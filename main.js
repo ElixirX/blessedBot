@@ -34,6 +34,7 @@ var hour, mins, secs = 0;
 var marking = 0;
 var fs = require("fs");
 var sys = require("sys");
+var sys = require("util");
 var path = require("path");
 var control = true;
 var toOutput = "";
@@ -59,7 +60,6 @@ var screen = blessed.screen({
 
 
 var chatIn = blessed.textarea({
-
 	bottom: '0',
 	left: 'center',
 	width: '100%',
@@ -78,7 +78,6 @@ var chatIn = blessed.textarea({
 });
 
 var consoleBox = blessed.textarea({
-
 	bottom: '0',
 	left: 'center',
 	hidden: 'true',
@@ -125,7 +124,7 @@ var chatBox = blessed.log({
 });
 
 var onlineBox = blessed.list({
-	top: '0',
+	rtop: '0',
 	right: '0',
 	width: '20%',
 	height: '82%',
@@ -169,11 +168,9 @@ function rand(min, max) {
 }
 
 function start() {
-
-setInterval(function() {
-	screen.render();
-}, 200);
-
+	setInterval(function() {
+		screen.render();
+	}, 200);
 }
 
 /**
@@ -181,117 +178,113 @@ setInterval(function() {
 */
 
 function irlTime() {
-hour = new Date().getHours();
-mins = new Date().getMinutes();
-secs = new Date().getSeconds();
+	hour = new Date().getHours();
+	mins = new Date().getMinutes();
+	secs = new Date().getSeconds();
 
-if (hour < 10) {
-hour = "0" + hour;
-}
-if (mins < 10) {
-mins = "0" + mins;
-}
-if (secs < 10) {
-secs = "0" + secs;
-}
-return ("[" + hour + ":" + mins + ":" + secs + "] ");
+	if (hour < 10) {
+		hour = "0" + hour;
+	}
+	if (mins < 10) {
+		mins = "0" + mins;
+	}
+	if (secs < 10) {
+		secs = "0" + secs;
+	}
+	return ("[" + hour + ":" + mins + ":" + secs + "] ");
 }
 
 var ChatListen = function() {};
 
 function main() {
-screen.on('keypress', function(ch, key) {
-if (key.name === 'q' || key.name === 'C-c' || key.name === 'S-c') {
-return process.exit(0);
-}
-if (key.name === 'space') {
-onlineBox.toggle();
-if (onlineBox.hidden) {
-	chatBox.width = '100%';
-	return 0;
-} else {
-	chatBox.width = '80%';
-	return 1;
-}
-
-}
-if (key.name === 'c') {
-consoleBox.toggle();
-chatIn.toggle();
-return 0;
-}
-if (key.name === 'up') {
-return chatBox.scroll(-1);
-}
-if (key.name === 'down') {
-return chatBox.scroll(1);
-}
-if (key.name === 'enter') {
-if (chatIn.hidden === false) {
-	return chatIn.readInput();
-} else {
-	return consoleBox.readInput();
-}
-}
-if (key.name === 'escape') {
-if (chatIn.hidden === false) {
-	if (chatIn.value !== "") {
-		chat.sendMessage(chatIn.value);
-		return chatIn.clearValue();
+	screen.on('keypress', function(ch, key) {
+	if (key.name === 'q' || key.name === 'C-c' || key.name === 'S-c') {
+		return process.exit(0);
 	}
-} else {
-	if (consoleBox.value !== "") {
-		var cmd = consoleBox.value;
-		if (cmd === 'leave') {
-			chat.leave();
-			chatBox.pushLine(irlTime() + userName + " {bold}(you){/bold} left.");
-			onlineBox.clearItems();
-
+	if (key.name === 'space') {
+		onlineBox.toggle();
+		if (onlineBox.hidden) {
+			chatBox.width = '100%';
+			return 0;
+		} else {
+			chatBox.width = '80%';
+			return 1;
 		}
-		if (cmd.substring(0, 4) === 'join' && cmd.substring(5, cmd.length) != undefined && cmd.substring(5, cmd.length) != "") {
-			room = cmd.substring(5, cmd.length);
-			chat = new HackChat.Session(room, (userName + "#" + tripCode));
-			chatBox.pushLine(irlTime() + userName + " {bold}(you){/bold} joined channel ?" + room + ".");
-			ChatListen();
+	}
+	if (key.name === 'c') {
+		consoleBox.toggle();
+		chatIn.toggle();
+		return 0;
+	}
+	if (key.name === 'up') {
+		return chatBox.scroll(-1);
+	}
+	if (key.name === 'down') {
+		return chatBox.scroll(1);
+	}
+	if (key.name === 'enter') {
+		if (chatIn.hidden === false) {
+			return chatIn.readInput();
+		} else {
+			return consoleBox.readInput();
 		}
-		if (cmd === 'control') {
-			if (control) {
-				control = false;
-				chatBox.pushLine(irlTime() + "Bot control {bold}off{/bold}.");
+	}
+	if (key.name === 'escape') {
+		if (chatIn.hidden === false) {
+			if (chatIn.value !== "") {
+				chat.sendMessage(chatIn.value);
+				return chatIn.clearValue();
+				}
 			} else {
-				control = true;
-				chatBox.pushLine(irlTime() + "Bot control {bold}on{/bold}.");
+				if (consoleBox.value !== "") {
+					var cmd = consoleBox.value;
+					if (cmd === 'leave') {
+						chat.leave();
+						chatBox.pushLine(irlTime() + userName + " {bold}(you){/bold} left.");
+						onlineBox.clearItems();
+
+					}
+					if (cmd.substring(0, 4) === 'join' && cmd.substring(5, cmd.length) != undefined && cmd.substring(5, cmd.length) != "") {
+						room = cmd.substring(5, cmd.length);
+						chat = new HackChat.Session(room, (userName + "#" + tripCode));
+						chatBox.pushLine(irlTime() + userName + " {bold}(you){/bold} joined channel ?" + room + ".");
+						ChatListen();
+					}
+					if (cmd === 'control') {
+						if (control) {
+							control = false;
+							chatBox.pushLine(irlTime() + "Bot control {bold}off{/bold}.");
+						} else {
+							control = true;
+							chatBox.pushLine(irlTime() + "Bot control {bold}on{/bold}.");
+						}
+					}
+					return consoleBox.clearValue();
+				}
 			}
 		}
-		return consoleBox.clearValue();
-	}
-}
-}
-});
-
+	});
 return start();
-
 }
 
 main();
 
 fs.readFile(path.join(__dirname, datafile), "utf8", function(err, data) {
-var p, i, line;
-if (err) {
-throw err;
+	var p, i, line;
+	if (err) {
+	throw err;
 }
 var lines = data.split("\n");
 
 for (i = 0; i < lines.length; i++) {
-line = lines[i].trim();
+	line = lines[i].trim();
 	if (line[0] === '#') {
 		continue;
 	}
 	if (line.length === 0) {
 		continue;
 	}
-facts.push(line);
-
+	facts.push(line);
 }
 if (facts.length === 0) {
 	chatBox.content = chatBox.content + "\n" + "No truths found.";
@@ -314,79 +307,78 @@ function include(arr, obj, markIt) {
 }
 
 function saveSend(message, latexify) {
-lastMessage = new Date().getTime();
-if (latexify != 0) {
-message = message.replace(/~/g, "\\ ");
-message = message.replace(/\^/g, "\\ ");
-message = message.replace(/\\/g, "\\ ");
-message = message.replace(/ /g, "\\ ");
-message = message.replace(/_/g, "\\ ");
-message = message.replace(/\?/g, "? ");
-message = message.replace(/{/g, "");
-message = message.replace(/}/g, "");
+	lastMessage = new Date().getTime();
+	if (latexify != 0) {
+	message = message.replace(/~/g, "\\ ");
+	message = message.replace(/\^/g, "\\ ");
+	message = message.replace(/\\/g, "\\ ");
+	message = message.replace(/ /g, "\\ ");
+	message = message.replace(/_/g, "\\ ");
+	message = message.replace(/\?/g, "? ");
+	message = message.replace(/{/g, "");
+	message = message.replace(/}/g, "");
+		if (latexify === 1) {
+			message = message.replace(/\\\\/g, "\\");
+			message = message.replace(/\$/g, "\\$");
+			message = message.replace(/\>/g, "\\>");
+			message = message.replace(/\</g, "\\<");
+			message = message.replace(/#/g, "\\#");
+			message = message.replace(/%/g, "\\%");
+			message = message.replace(/&/g, "\\&");
+		} else {
+			message = message.replace(/\|/g, "\\ ");
+			message = message.replace(/\$/g, "\\ ");
+			message = message.replace(/\>/g, "\\ ");
+			message = message.replace(/\</g, "\\ ");
+			message = message.replace(/#/g, "\\ ");
+			message = message.replace(/%/g, "\\ ");
+			message = message.replace(/&/g, "\\ ");
+			message = message.replace(/\\/g, "\\ ");
+		}
+	}
+
 	if (latexify === 1) {
-		message = message.replace(/\\\\/g, "\\");
-		message = message.replace(/\$/g, "\\$");
-		message = message.replace(/\>/g, "\\>");
-		message = message.replace(/\</g, "\\<");
-		message = message.replace(/#/g, "\\#");
-		message = message.replace(/%/g, "\\%");
-		message = message.replace(/&/g, "\\&");
-	} else {
-		message = message.replace(/\|/g, "\\ ");
-		message = message.replace(/\$/g, "\\ ");
-		message = message.replace(/\>/g, "\\ ");
-		message = message.replace(/\</g, "\\ ");
-		message = message.replace(/#/g, "\\ ");
-		message = message.replace(/%/g, "\\ ");
-		message = message.replace(/&/g, "\\ ");
-		message = message.replace(/\\/g, "\\ ");
-	}
-}
 
-if (latexify === 1) {
-
-message = "$" + message + " $";
-
-d = 0;
-for (i = 0; i < message.length; i++) {
-	d++;
-	if (d > 80 && message.substring(i, i + 1) === " ") {
-		message = message.substring(0, i) + " $ \n $ ~ " + message.substring(i + 1, message.length)
+	message = "$" + message + " $";
 		d = 0;
+		for (i = 0; i < message.length; i++) {
+			d++;
+			if (d > 80 && message.substring(i, i + 1) === " ") {
+				message = message.substring(0, i) + " $ \n $ ~ " + message.substring(i + 1, message.length)
+				d = 0;
+			}
+		}
+	} else if (latexify === 2) {
+		message = "$\\text\{" + message + "\}$";
+	} else if (latexify === 3) {
+		message = "$\\tiny\{\\text\{" + message + "\}\}$";
+	} else if (latexify === 4) {
+		message = "$\\small\{\\text\{" + message + "\}\}$";
+	} else if (latexify === 5) {
+		message = "$\\large\{\\text\{" + message + "\}\}$";
+	} else if (latexify === 6) {
+		message = "$\\huge\{\\text\{" + message + "\}\}$";
 	}
-}
-} else if (latexify === 2) {
-message = "$\\text\{" + message + "\}$";
-} else if (latexify === 3) {
-message = "$\\tiny\{\\text\{" + message + "\}\}$";
-} else if (latexify === 4) {
-message = "$\\small\{\\text\{" + message + "\}\}$";
-} else if (latexify === 5) {
-message = "$\\large\{\\text\{" + message + "\}\}$";
-} else if (latexify === 6) {
-message = "$\\huge\{\\text\{" + message + "\}\}$";
-}
-chat.sendMessage(message);
+	chat.sendMessage(message);
 }
 
 function saveInvite(nickname) {
-chat.invite(nickname);
+	chat.invite(nickname);
 }
 
 function centerText(line, width) {
-var output = "";
-for (var i = 0; i < (width - line.length) / 2 - 1; i++) {
-output = output + ' ';
-}
-output = output + line;
-for (var i = 0; i < ((width - line.length) / 2 + 1); i++) {
-output = output + ' ';
-}
-if (line.length % 2 == 1) {
-output = output.substring(0, output.length - 1);
-}
-return output;
+	var output = "";
+	for (var i = 0; i < (width - line.length) / 2 - 1; i++) {
+		output = output + ' ';
+	}
+	output = output + line;
+	for (var i = 0; i < ((width - line.length) / 2 + 1); i++) {
+		output = output + ' ';
+	}
+	if (line.length % 2 == 1) {
+		output = output.substring(0, output.length - 1);
+	}
+	return output;
 }
 
 //** CHAT LISTENERS  **//
@@ -432,60 +424,59 @@ chat.on("nicknameTaken", function(time) {
 });
 
 chat.on("onlineSet", function(nicks) {
-chatBox.pushLine("\n" + irlTime() + userName + " {bold}(you){/bold} joined.");
-onlineBox.add("");
+	chatBox.pushLine("\n" + irlTime() + userName + " {bold}(you){/bold} joined.");
+	onlineBox.add("");
 
-for (var p = 0; p < nicks.length; p++) {
-	if (nicks[p] === "ElixirX" || nicks[p] === "Rhondo" || nicks[p] === userName) {
-		onlineBox.add("{bold}" + nicks[p] + "{/bold}");
-	} else {
-		onlineBox.add(nicks[p]);
+	for (var p = 0; p < nicks.length; p++) {
+		if (nicks[p] === "ElixirX" || nicks[p] === "Rhondo" || nicks[p] === userName) {
+			onlineBox.add("{bold}" + nicks[p] + "{/bold}");
+		} else {
+			onlineBox.add(nicks[p]);
+		}
 	}
-}
 });
 
 chat.on("onlineAdd", function(nick) {
-hour = new Date().getHours();
-mins = new Date().getMinutes();
-secs = new Date().getSeconds();
+	hour = new Date().getHours();
+	mins = new Date().getMinutes();
+	secs = new Date().getSeconds();
 
-if (hour < 10)
-	hour = "0" + hour;
-if (mins < 10)
-	mins = "0" + mins;
-if (secs < 10)
-	secs = "0" + secs;
+	if (hour < 10)
+		hour = "0" + hour;
+	if (mins < 10)
+		mins = "0" + mins;
+	if (secs < 10)
+		secs = "0" + secs;
 
-chatBox.pushLine(irlTime() + nick + " joined.");
-//Highlight certain usernames
-if (nick === "ElixirX" || trip === "nNoV44") {
-	onlineBox.add("{bold}" + nick + "{/bold}");
-} else {
-	onlineBox.add(nick);
-}
+	chatBox.pushLine(irlTime() + nick + " joined.");
+	//Highlight certain usernames
+	if (nick === "ElixirX" || trip === "nNoV44") {
+		onlineBox.add("{bold}" + nick + "{/bold}");
+	} else {
+		onlineBox.add(nick);
+	}
 });
 
 chat.on("onlineRemove", function(nick) {
-hour = new Date().getHours();
-mins = new Date().getMinutes();
-secs = new Date().getSeconds();
+	hour = new Date().getHours();
+	mins = new Date().getMinutes();
+	secs = new Date().getSeconds();
 
-if (hour < 10)
-	hour = "0" + hour;
-if (mins < 10)
-	mins = "0" + mins;
-if (secs < 10)
-	secs = "0" + secs;
+	if (hour < 10)
+		hour = "0" + hour;
+	if (mins < 10)
+		mins = "0" + mins;
+	if (secs < 10)
+		secs = "0" + secs;
 
-chatBox.pushLine(irlTime() + nick + " left.");
+	chatBox.pushLine(irlTime() + nick + " left.");
 
-for (var ite = 0; ite < onlineBox.items.length; ite++) {
-
-	var checkingNick = escape(onlineBox.items[ite].getLines());
-	if (checkingNick == nick || checkingNick == "%1B%5B1m" + nick + "%1B%5B22m") {
-		onlineBox.removeItem(ite);
+	for (var ite = 0; ite < onlineBox.items.length; ite++) {
+		var checkingNick = escape(onlineBox.items[ite].getLines());
+		if (checkingNick == nick || checkingNick == "%1B%5B1m" + nick + "%1B%5B22m") {
+			onlineBox.removeItem(ite);
+		}
 	}
-}
 });
 
 /*//////   STARTS HERE   //////*/
@@ -493,13 +484,9 @@ for (var ite = 0; ite < onlineBox.items.length; ite++) {
 chat.on("chat", function(nick, text, time, isAdmin, trip) {
 
 if (trip === "undefined") {
-
 	chatBox.pushLine(irlTime() + "       # " + nick + ": " + text);
-
 } else {
-
 	chatBox.pushLine(irlTime() + trip + " # " + nick + ": " + text);
-
 }
 
 toOutput = "";
@@ -530,7 +517,6 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		if (text.trim() == "*off" && trip == "nNoV44"){
 		return saveSend("Closing.", 1);
 		process.exit();
-
 	}
 
 	if (text.substring(0, 6).trim() == "*mute" && trip == "nNoV44"){
@@ -541,7 +527,6 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 	}
 
 	if (text.substring(0, 8).trim() == "*unmute" && trip == "nNoV44"){
-
 		var indexOut = muted.indexOf(text.substring(8,text.length).trim());
 		if( indexOut != -1){
 			muted.splice(indexOut, 1);
@@ -550,11 +535,10 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		}
 	}
 
-
 	if (text == "*invite") {
 		//Exclude access to certain users
 		if (trip === "nNoV44") {
-			return saveSend("Specify invite recipient, syntax:\n  ~invite (user)", 0);
+			return saveSend("Specify invite recipient, syntax:\n  *invite (user)", 0);
 		} else {
 			return saveSend("I'm not letting you do that.", 2);
 		}
@@ -562,7 +546,7 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		//Exclude access to certain users
 		if (trip === "nNoV44") {
 			if (text.substring(8, text.length).trim() == "") {
-				return saveSend("Specify invite recipient, syntax: \n  ~invite (user)", 0);
+				return saveSend("Specify invite recipient, syntax: \n  *invite (user)", 0);
 			} else {
 				saveInvite(text.substring(8, text.length).trim());
 				return saveSend("I sent an invite to user " + text.substring(8, text.length).trim() + ", if they exist.", 0);
@@ -667,30 +651,30 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 			saveSend("Truth #" + (n + 1) + ": " + facts[n], 0);
 	}
 
-} else if (control === false) {
-	if (text.substring(0, 1) === "*") {
-		saveSend("* I'm not taking any commands right now *", 0);
+	} else if (control === false) {
+		if (text.substring(0, 1) === "*") {
+			saveSend("* I'm not taking any commands right now *", 0);
+		}
+	} else if (nick === userName) {
+		//This is the bot's own message, disregarding
+	} else {
+		chatBox.pushLine("{bold}### Messages are being sent too fast, ignoring ###{/bold}");
 	}
-} else if (nick === userName) {
-	//This is the bot's own message, disregarding
-} else {
-	chatBox.pushLine("{bold}### Messages are being sent too fast, ignoring ###{/bold}");
-}
 });
 
 chat.on("joining", function() {
 
-//Message to be sent on joinging a room, one after a 3000 delay after the other
-setTimeout(function() {
-	//saveSend("I'M ON",0);
+	//Message to be sent on joinging a room, one after a 3000 delay after the other
 	setTimeout(function() {
-		//saveSend("AND READY FOR ACTION.",0);
+		//saveSend("I'M ON",0);
+		setTimeout(function() {
+			//saveSend("AND READY FOR ACTION.",0);
+		}, 3000)
 	}, 3000)
-}, 3000)
 
-setInterval(function() {
-	chat.ping(); //KEEP ALIVE
-}, 0.4 * 60 * 1000);
+	setInterval(function() {
+		chat.ping(); //KEEP ALIVE
+	}, 0.4 * 60 * 1000);
 });
 }
 //Runs the function to listen for content from the websocket through hackchat's session
