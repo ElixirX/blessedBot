@@ -121,7 +121,7 @@ var chatBox = blessed.log({
 });
 
 var onlineBox = blessed.list({
-	rtop: '0',
+	top: '0',
 	right: '0',
 	width: '20%',
 	height: '82%',
