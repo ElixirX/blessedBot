@@ -50,14 +50,11 @@ var chat = new HackChat.Session(room, (userName + "#" + tripCode));
 
 var blessed = require('blessed');
 
-/**
-* Screen Layout
-**/
+//** Screen Layout **//
 
 var screen = blessed.screen({
 	dockBorders: 'true'
 });
-
 
 var chatIn = blessed.textarea({
 	bottom: '0',
@@ -173,9 +170,7 @@ function start() {
 	}, 200);
 }
 
-/**
-* Main
-*/
+//** Main **//
 
 function irlTime() {
 	hour = new Date().getHours();
@@ -242,7 +237,6 @@ function main() {
 						chat.leave();
 						chatBox.pushLine(irlTime() + userName + " {bold}(you){/bold} left.");
 						onlineBox.clearItems();
-
 					}
 					if (cmd.substring(0, 4) === 'join' && cmd.substring(5, cmd.length) != undefined && cmd.substring(5, cmd.length) != "") {
 						room = cmd.substring(5, cmd.length);
@@ -291,7 +285,6 @@ if (facts.length === 0) {
 	return;
 }
 
-
 var lastMessage = new Date().getTime();
 var lastQuote = new Date().getTime();
 
@@ -338,7 +331,6 @@ function saveSend(message, latexify) {
 	}
 
 	if (latexify === 1) {
-
 	message = "$" + message + " $";
 		d = 0;
 		for (i = 0; i < message.length; i++) {
@@ -381,7 +373,7 @@ function centerText(line, width) {
 	return output;
 }
 
-//** CHAT LISTENERS  **//
+//** CHAT LISTENERS **//
 
 ChatListen = function() {
 
@@ -479,7 +471,7 @@ chat.on("onlineRemove", function(nick) {
 	}
 });
 
-/*//////   STARTS HERE   //////*/
+//**   The fun stuff happens down here   **//
 
 chat.on("chat", function(nick, text, time, isAdmin, trip) {
 
@@ -491,7 +483,7 @@ if (trip === "undefined") {
 
 toOutput = "";
 // Checks if the last message was sent in less than 4 seconds and if the message
-// Wasn't by the bot itself, as well as if controls are turned off
+// wasn't sent by the bot itself, as well as if control is turned off
 if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 
 	for (g = 0; g < afk.length; g++) {
@@ -514,7 +506,7 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		return saveSend("~ @" + nick + " is BACK.", 0);
 	} afkd = -1;
 
-		if (text.trim() == "*off" && trip == "nNoV44"){
+	if (text.trim() == "*off" && trip == "nNoV44"){
 		return saveSend("Closing.", 1);
 		process.exit();
 	}
@@ -531,7 +523,6 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		if( indexOut != -1){
 			muted.splice(indexOut, 1);
 			return saveSend(text.substring(8,text.length).trim()+" has been unmuted.", 1);
-
 		}
 	}
 
@@ -569,8 +560,7 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 		}
 	}
 
-
-	// Homebrew commands below
+//** Homebrew commands below **//
 
 	if (text ==  "*g")
 		return saveSend("HELLU FAGGITS!", 0);
@@ -656,7 +646,7 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 			saveSend("* I'm not taking any commands right now *", 0);
 		}
 	} else if (nick === userName) {
-		//This is the bot's own message, disregarding
+		//This is the bot's own message to the user
 	} else {
 		chatBox.pushLine("{bold}### Messages are being sent too fast, ignoring ###{/bold}");
 	}
@@ -664,11 +654,11 @@ if (lastMessage - new Date().getTime() < -4000 && nick != userName && control) {
 
 chat.on("joining", function() {
 
-	//Message to be sent on joinging a room, one after a 3000 delay after the other
+	//Message to be sent on joining a room, one after a 3000 delay after the other
 	setTimeout(function() {
 		//saveSend("I'M ON",0);
 		setTimeout(function() {
-			//saveSend("AND READY FOR ACTION.",0);
+			//saveSend("AND READY FOR ACTION BITCHES.",0);
 		}, 3000)
 	}, 3000)
 
